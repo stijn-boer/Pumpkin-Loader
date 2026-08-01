@@ -46,7 +46,7 @@ pub fn ensure(config: &Config, layout: &Layout, force: bool) -> Result<PathBuf> 
     if !force && artifact.is_file() && manifest_path.is_file() {
         verify_cached(&artifact, &manifest_path, &build_key)?;
         log::info!("Using cached build {}", short_key(&build_key));
-        modding::build_and_deploy_plugins(config, layout, &resolved_mods)?;
+        modding::build_and_deploy_plugins(config, layout, &commit, &resolved_mods)?;
         return Ok(artifact);
     }
 
@@ -54,7 +54,7 @@ pub fn ensure(config: &Config, layout: &Layout, force: bool) -> Result<PathBuf> 
     inject_requested_profiles(config, &worktree)?;
 
     compile(config, layout, &worktree, &artifact, &build_key, &commit)?;
-    modding::build_and_deploy_plugins(config, layout, &resolved_mods)?;
+    modding::build_and_deploy_plugins(config, layout, &commit, &resolved_mods)?;
     Ok(artifact)
 }
 
