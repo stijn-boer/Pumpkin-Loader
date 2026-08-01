@@ -138,7 +138,6 @@ pub struct MixinValidation {
 #[derive(Debug, Clone)]
 pub struct DiscoveredMod {
     pub directory: PathBuf,
-    pub manifest_path: PathBuf,
     pub manifest: ModManifest,
 }
 
@@ -168,7 +167,7 @@ pub fn init(config: &Config, layout: &Layout, name: &str, force: bool) -> Result
     }
 
     fs::create_dir_all(mod_dir.join("src"))?;
-    fs::create_dir_all(mod_dir.join("mixins/patches"))?;
+    fs::create_dir_all(mod_dir.join("mixins"))?;
     let revision = source::fetch(config, layout)?;
     let worktree = source::prepare_worktree(layout, &revision)?;
     let pumpkin = find_package(&worktree, "pumpkin")?;
@@ -229,7 +228,7 @@ pub fn discover(config: &Config, layout: &Layout, commit: &str) -> Result<HashMa
         validate_name(&manifest.mod_info.id)?;
         validate_manifest_paths(&directory, &manifest)?;
         let id = manifest.mod_info.id.clone();
-        if result.insert(id.clone(), DiscoveredMod { directory, manifest_path, manifest }).is_some() {
+        if result.insert(id.clone(), DiscoveredMod { directory, manifest }).is_some() {
             return Err(LoaderError::DuplicateModId { id });
         }
     }
@@ -565,12 +564,6 @@ fn find_dynamic_library_artifact(output: &str, package: Option<&str>) -> Result<
     candidates.sort(); candidates.pop().ok_or(LoaderError::PluginArtifactNotReported)
 }
 
-pub fn sync_crate(layout: &Layout, name: &str) -> Result<PathBuf> {
-    let mod_dir = resolve_mod(layout, name)?;
-    let manifest = load_manifest(&mod_dir)?;
-    Ok(plugin_root(&mod_dir, &manifest))
-}
-
 pub fn create_patch(config: &Config, layout: &Layout, name: &str, patch_name: &str) -> Result<PathBuf> {
     let mod_dir = resolve_mod(layout, name)?;
     let manifest = load_manifest(&mod_dir)?;
@@ -585,17 +578,13 @@ pub fn create_patch(config: &Config, layout: &Layout, name: &str, patch_name: &s
     if !diff.ends_with('\n') {
         diff.push('\n');
     }
-    let patches = mod_dir.join("mixins/patches"); fs::create_dir_all(&patches)?;
+    let patches = mod_dir.join("mixins"); fs::create_dir_all(&patches)?;
     let filename = format!("{:03}-{}.patch", next_patch_number(&patches)?, slugify(patch_name));
-    let relative = PathBuf::from("mixins/patches").join(&filename);
+    let relative = PathBuf::from("mixins").join(&filename);
     let path = mod_dir.join(&relative); fs::write(&path, diff)?;
     append_mixin_to_manifest(&mod_dir.join(MANIFEST_NAME), patch_name, &relative)?;
     process::checked(Command::new("git").current_dir(&worktree).args(["add", "--all", "--", ".", ":(glob,exclude)**/Cargo.lock"]), "advance mixin patch baseline")?;
     log::info!("Generated mixin patch {}", path.display()); Ok(path)
-}
-
-pub fn save(config: &Config, layout: &Layout, name: &str, patch_name: &str) -> Result<PathBuf> {
-    create_patch(config, layout, name, patch_name)
 }
 
 pub fn hash_mixins(mods: &ResolvedMods) -> Result<Vec<u8>> {
