@@ -857,14 +857,14 @@ pub fn create_patch(
     if diff.trim().is_empty() {
         return Err(LoaderError::NoModChanges { worktree });
     }
-    let patches = mod_dir.join("mixins/patches");
+    let patches = mod_dir.join("mixins");
     fs::create_dir_all(&patches)?;
     let filename = format!(
         "{:03}-{}.patch",
         next_patch_number(&patches)?,
         slugify(patch_name)
     );
-    let relative = PathBuf::from("mixins/patches").join(&filename);
+    let relative = PathBuf::from("mixins").join(&filename);
     let path = mod_dir.join(&relative);
     fs::write(&path, diff)?;
     append_mixin_to_manifest(&mod_dir.join(MANIFEST_NAME), patch_name, &relative)?;

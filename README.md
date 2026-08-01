@@ -376,9 +376,7 @@ pumpkin-loader clean
 
 pumpkin-loader mod init <name> [--force]
 pumpkin-loader mod dev <name>
-pumpkin-loader mod sync <name>
 pumpkin-loader mod patch <name> [--patch-name <name>]
-pumpkin-loader mod save <name> [--patch-name <name>]
 ```
 
 Global options:
