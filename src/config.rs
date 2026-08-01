@@ -23,7 +23,6 @@ pub struct Config {
     pub paths: PathsConfig,
     pub build: BuildConfig,
     pub runtime: RuntimeConfig,
-    pub mods: ModsConfig,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -92,18 +91,6 @@ pub struct RuntimeConfig {
     pub environment: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(default)]
-pub struct ModsConfig {
-    pub deploy_builtins: bool,
-}
-impl Default for ModsConfig {
-    fn default() -> Self {
-        Self {
-            deploy_builtins: true,
-        }
-    }
-}
 impl Default for RuntimeConfig {
     fn default() -> Self {
         Self {

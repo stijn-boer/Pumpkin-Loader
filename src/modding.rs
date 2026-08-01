@@ -173,13 +173,10 @@ pub fn init(config: &Config, layout: &Layout, name: &str, force: bool) -> Result
     }
 
     fs::create_dir_all(mod_dir.join("plugin/src"))?;
-    fs::create_dir_all(mod_dir.join("mixins/patches"))?;
+    fs::create_dir_all(mod_dir.join("mixins"))?;
     let revision = source::fetch(config, layout)?;
     let worktree = source::prepare_worktree(layout, &revision)?;
     let pumpkin = find_package(&worktree, "pumpkin")?;
-    let pumpkin_data = find_package(&worktree, "pumpkin-data")?;
-    let pumpkin_protocol = find_package(&worktree, "pumpkin-protocol")?;
-    let pumpkin_util = find_package(&worktree, "pumpkin-util")?;
     let pumpkin_api_macros = find_package(&worktree, "pumpkin-api-macros")?;
     let manifest = ModManifest {
         format: DEFAULT_FORMAT,
@@ -202,9 +199,6 @@ pub fn init(config: &Config, layout: &Layout, name: &str, force: bool) -> Result
     };
     write_manifest(&mod_dir.join(MANIFEST_NAME), &manifest)?;
     let pumpkin = toml_path(&pumpkin);
-    let pumpkin_data = toml_path(&pumpkin_data);
-    let pumpkin_protocol = toml_path(&pumpkin_protocol);
-    let pumpkin_util = toml_path(&pumpkin_util);
     let pumpkin_api_macros = toml_path(&pumpkin_api_macros);
     fs::write(
         mod_dir.join("plugin/Cargo.toml"),
@@ -214,9 +208,6 @@ pub fn init(config: &Config, layout: &Layout, name: &str, force: bool) -> Result
                 ("{{MOD_ID}}", &slug),
                 ("{{MOD_NAME}}", name),
                 ("{{PUMPKIN_PATH}}", &pumpkin),
-                ("{{PUMPKIN_DATA_PATH}}", &pumpkin_data),
-                ("{{PUMPKIN_PROTOCOL_PATH}}", &pumpkin_protocol),
-                ("{{PUMPKIN_UTIL_PATH}}", &pumpkin_util),
                 ("{{PUMPKIN_API_MACROS_PATH}}", &pumpkin_api_macros),
             ],
         ),

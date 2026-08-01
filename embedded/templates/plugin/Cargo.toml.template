@@ -10,9 +10,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pumpkin = { path = "{{PUMPKIN_PATH}}", package = "pumpkin" }
-pumpkin-data = { path = "{{PUMPKIN_DATA_PATH}}", package = "pumpkin-data" }
-pumpkin-protocol = { path = "{{PUMPKIN_PROTOCOL_PATH}}", package = "pumpkin-protocol" }
-pumpkin-util = { path = "{{PUMPKIN_UTIL_PATH}}", package = "pumpkin-util" }
 pumpkin-api-macros = { path = "{{PUMPKIN_API_MACROS_PATH}}", package = "pumpkin-api-macros" }
 
 tokio = "1"
