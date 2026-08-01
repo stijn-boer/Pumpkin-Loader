@@ -1,15 +1,16 @@
-use crate::{
-    config::SandboxMode,
-    error::{LoaderError, Result},
-    layout::Layout,
-    util::find_in_path,
-};
 use std::{
     collections::BTreeMap,
     env,
     ffi::{OsStr, OsString},
     path::{Path, PathBuf},
     process::{Command, ExitStatus, Stdio},
+};
+
+use crate::{
+    config::SandboxMode,
+    error::{LoaderError, Result},
+    layout::Layout,
+    util::find_in_path,
 };
 
 #[derive(Debug)]
@@ -27,21 +28,34 @@ pub fn command(
     purpose: Purpose<'_>,
     layout: &Layout,
 ) -> Result<Command> {
+    if !cfg!(target_os = "linux") {
+        if matches!(mode, SandboxMode::Require) {
+            return Err(LoaderError::SandboxUnavailable);
+        }
+
+        // Bubblewrap is Linux-specific. On Windows and other platforms, `auto`
+        // intentionally falls back to an ordinary child process without probing
+        // PATH for bwrap or printing an alarming warning.
+        return Ok(direct_command(program, args, cwd, envs));
+    }
+
     let bwrap = find_in_path("bwrap");
     let use_bwrap = match (mode, bwrap.is_some()) {
         (SandboxMode::Off, _) => false,
-        (SandboxMode::Auto, true) | (SandboxMode::Require, true) => cfg!(target_os = "linux"),
+        (SandboxMode::Auto, true) | (SandboxMode::Require, true) => true,
         (SandboxMode::Auto, false) => {
-            log::warn!("bubblewrap is unavailable; using process/directory isolation only");
+            log::warn!(
+                "bubblewrap is unavailable; using process/directory isolation only"
+            );
             false
         }
-        (SandboxMode::Require, false) => return Err(LoaderError::SandboxUnavailable),
+        (SandboxMode::Require, false) => {
+            return Err(LoaderError::SandboxUnavailable);
+        }
     };
 
     if !use_bwrap {
-        let mut command = Command::new(program);
-        command.args(args).current_dir(cwd).env_clear().envs(envs);
-        return Ok(command);
+        return Ok(direct_command(program, args, cwd, envs));
     }
 
     log::debug!("starting {:?} sandbox with bubblewrap", purpose);
@@ -77,6 +91,7 @@ pub fn command(
                 .arg("--bind")
                 .arg(&layout.plugin_target)
                 .arg(&layout.plugin_target);
+
             if let Some(home) = env::var_os("HOME") {
                 let rustup = PathBuf::from(home).join(".rustup");
                 if rustup.exists() {
@@ -95,6 +110,7 @@ pub fn command(
                 .arg(cwd);
         }
     }
+
     command
         .arg("--chdir")
         .arg(cwd)
@@ -103,7 +119,23 @@ pub fn command(
         .args(args)
         .env_clear()
         .envs(envs);
+
     Ok(command)
+}
+
+fn direct_command(
+    program: &Path,
+    args: &[String],
+    cwd: &Path,
+    envs: &BTreeMap<OsString, OsString>,
+) -> Command {
+    let mut command = Command::new(program);
+    command
+        .args(args)
+        .current_dir(cwd)
+        .env_clear()
+        .envs(envs);
+    command
 }
 
 pub fn run_inherited(mut command: Command, description: &str) -> Result<ExitStatus> {
@@ -122,11 +154,35 @@ pub fn run_inherited(mut command: Command, description: &str) -> Result<ExitStat
 
 pub fn minimal_environment() -> BTreeMap<OsString, OsString> {
     let mut result = BTreeMap::new();
+
+    // Keep the environment deliberately small, but preserve every platform
+    // variable required to spawn programs and let Cargo/rustup locate their
+    // installations and temporary directories.
     for key in [
         "PATH",
         "HOME",
         "USER",
         "LOGNAME",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH",
+        "SYSTEMROOT",
+        "SystemRoot",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "TEMP",
+        "TMP",
+        "TMPDIR",
+        "LOCALAPPDATA",
+        "APPDATA",
+        "PROGRAMDATA",
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "PROGRAMW6432",
+        "NUMBER_OF_PROCESSORS",
+        "PROCESSOR_ARCHITECTURE",
+        "CARGO_HOME",
         "RUSTUP_HOME",
         "RUSTUP_TOOLCHAIN",
         "TERM",
@@ -147,13 +203,30 @@ pub fn minimal_environment() -> BTreeMap<OsString, OsString> {
             result.insert(key.into(), value);
         }
     }
+
     if !result.contains_key(OsStr::new("RUSTUP_HOME")) {
-        if let Some(home) = env::var_os("HOME") {
+        if let Some(home) = user_home() {
             result.insert(
                 "RUSTUP_HOME".into(),
-                PathBuf::from(home).join(".rustup").into_os_string(),
+                home.join(".rustup").into_os_string(),
             );
         }
     }
+
+    if !result.contains_key(OsStr::new("CARGO_HOME")) {
+        if let Some(home) = user_home() {
+            result.insert(
+                "CARGO_HOME".into(),
+                home.join(".cargo").into_os_string(),
+            );
+        }
+    }
+
     result
+}
+
+fn user_home() -> Option<PathBuf> {
+    env::var_os("HOME")
+        .or_else(|| env::var_os("USERPROFILE"))
+        .map(PathBuf::from)
 }
