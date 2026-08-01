@@ -1,0 +1,5 @@
+/target/
+/.pumpkin-loader/
+/server/
+Cargo.lock
+mods/

@@ -1,0 +1,26 @@
+[pumpkin]
+repository = "https://github.com/Pumpkin-MC/Pumpkin.git"
+# Pin this to a full 40-character commit for reproducible modpacks.
+revision = "master"
+
+[paths]
+state = ".pumpkin-loader"
+server_data = "server"
+
+[build]
+profile = "moddev"
+binary = "pumpkin"
+cargo_features = []
+no_default_features = false
+locked = true
+jobs = 12
+# rustflags = "-C target-cpu=native"
+sandbox = "auto"
+
+[build.environment]
+
+[runtime]
+sandbox = "auto"
+
+[runtime.environment]
+RUST_BACKTRACE = "1"
