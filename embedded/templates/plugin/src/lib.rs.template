@@ -5,8 +5,7 @@ use std::sync::Arc;
 use pumpkin::plugin::Context;
 use pumpkin_api_macros::{plugin_impl, plugin_method};
 
-#[plugin_method]
-async fn on_load(&self, server: Arc<Context>) -> Result<(), String> {
+async fn on_load_inner(plugin: &Plugin, server: Arc<Context>) -> Result<(), String> {
     server.init_log();
     tracing::info!("Loading {{MOD_NAME}}");
 
@@ -15,8 +14,7 @@ async fn on_load(&self, server: Arc<Context>) -> Result<(), String> {
     Ok(())
 }
 
-#[plugin_method]
-async fn on_unload(&self, _server: Arc<Context>) -> Result<(), String> {
+async fn on_unload_inner(plugin: &Plugin, server: Arc<Context>) -> Result<(), String> {
     tracing::info!("Unloading {{MOD_NAME}}");
     Ok(())
 }
@@ -29,6 +27,16 @@ impl Plugin {
     pub const fn new() -> Self {
         Self
     }
+}
+
+#[plugin_method]
+async fn on_load(&self, server: Arc<Context>) -> Result<(), String> {
+    on_load_inner(self, server).await
+}
+
+#[plugin_method]
+async fn on_unload(&self, _server: Arc<Context>) -> Result<(), String> {
+    on_unload_inner(self, server).await
 }
 
 impl Default for Plugin {
