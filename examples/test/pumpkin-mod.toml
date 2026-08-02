@@ -1,0 +1,32 @@
+format = 1
+
+[mod]
+id = "test"
+name = "test"
+version = "0.1.0"
+authors = []
+
+[pumpkin]
+revisions = ["f0c7332f0512ff6b9da283959e9d877a4177e0cc"]
+
+[plugin]
+
+[dependencies]
+required = []
+conflicts = []
+load_after = []
+load_before = []
+
+[[mixins]]
+id = "add-test-data"
+patch = 'mixins\001-add-test-data.patch'
+required = true
+after = []
+before = []
+
+[mixins.target]
+files = []
+
+[mixins.validation]
+contains = []
+not_contains = []

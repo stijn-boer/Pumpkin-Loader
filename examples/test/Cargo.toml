@@ -1,0 +1,21 @@
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "test mod for Pumpkin"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+pumpkin = { path = '..\\..\\.pumpkin-loader\\worktrees\\f0c7332f0512ff6b9da283959e9d877a4177e0cc\\pumpkin', package = "pumpkin" }
+pumpkin-util = { path = '..\\..\\Pumpkin-Loader\\.pumpkin-loader\\worktrees\\f0c7332f0512ff6b9da283959e9d877a4177e0cc\\pumpkin-util', package = "pumpkin-util" }
+pumpkin-data = { path = '..\\..\\Pumpkin-Loader\\.pumpkin-loader\\worktrees\\f0c7332f0512ff6b9da283959e9d877a4177e0cc\\pumpkin-data', package = "pumpkin-data" }
+pumpkin-api-macros = { path = '..\\..\\Pumpkin-Loader\\.pumpkin-loader\\worktrees\\f0c7332f0512ff6b9da283959e9d877a4177e0cc\\pumpkin-api-macros', package = "pumpkin-api-macros" }
+
+tracing = "0.1"
+tokio = "1"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }

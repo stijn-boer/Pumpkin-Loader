@@ -1,0 +1,21 @@
+diff --git a/pumpkin/src/server/mod.rs b/pumpkin/src/server/mod.rs
+index b9898e5844eeb121889801d9787e8eae3d49a2a4..e384a6c90937d5cfdb276f2e104db497ec412488 100644
+--- a/pumpkin/src/server/mod.rs
++++ b/pumpkin/src/server/mod.rs
+@@ -74,7 +74,7 @@ pub struct Server {
+     pub advanced_config: AdvancedConfiguration,
+ 
+     pub data: VanillaData,
+-
++    pub test_data: RwLock<usize>,
+     /// Plugin manager
+     pub plugin_manager: Arc<PluginManager>,
+ 
+@@ -259,6 +259,7 @@ impl Server {
+             basic_config,
+             advanced_config,
+             data: vanilla_data,
++            test_data: RwLock::new(0),
+             plugin_manager: Arc::new(PluginManager::new()),
+             permission_manager: Arc::new(RwLock::new(PermissionManager::new(
+                 permission_registry.clone(),
