@@ -16,7 +16,6 @@ pub struct Layout {
     pub builds: PathBuf,
     pub cargo_home: PathBuf,
     pub cargo_target: PathBuf,
-    pub plugin_target: PathBuf,
     pub server_data: PathBuf,
     pub mods: PathBuf,
 }
@@ -35,7 +34,6 @@ impl Layout {
             builds: state.join("builds"),
             cargo_home: state.join("cargo-home"),
             cargo_target: state.join("cargo-target"),
-            plugin_target: state.join("plugin-target"),
             server_data: config
                 .paths
                 .server_data
@@ -53,7 +51,6 @@ impl Layout {
             &self.builds,
             &self.cargo_home,
             &self.cargo_target,
-            &self.plugin_target,
             &self.server_data,
             &self.mods,
         ] {

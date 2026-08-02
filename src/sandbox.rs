@@ -87,10 +87,7 @@ pub fn command(
                 .arg(&layout.cargo_home)
                 .arg("--bind")
                 .arg(&layout.cargo_target)
-                .arg(&layout.cargo_target)
-                .arg("--bind")
-                .arg(&layout.plugin_target)
-                .arg(&layout.plugin_target);
+                .arg(&layout.cargo_target);
 
             if let Some(home) = env::var_os("HOME") {
                 let rustup = PathBuf::from(home).join(".rustup");

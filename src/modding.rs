@@ -477,7 +477,7 @@ fn build_and_deploy_plugin(config: &Config, layout: &Layout, commit: &str, item:
     if let Some(jobs) = config.build.jobs { args.extend(["--jobs".to_owned(), jobs.to_string()]); }
     let mut envs = sandbox::minimal_environment();
     envs.insert("CARGO_HOME".into(), layout.cargo_home.as_os_str().into());
-    envs.insert("CARGO_TARGET_DIR".into(), layout.plugin_target.as_os_str().into());
+    envs.insert("CARGO_TARGET_DIR".into(), layout.cargo_target.as_os_str().into());
     envs.insert("CARGO".into(), toolchain.cargo.as_os_str().into());
     envs.insert("RUSTC".into(), toolchain.rustc.as_os_str().into());
     envs.insert("PATH".into(), toolchain::path(&toolchain.cargo)?);
@@ -485,7 +485,7 @@ fn build_and_deploy_plugin(config: &Config, layout: &Layout, commit: &str, item:
     let mut command = sandbox::command(&toolchain.cargo, &args, &plugin_root, &envs, config.build.sandbox, Purpose::Build, layout)?;
     let output = process::output(&mut command, &format!("build plugin {}", item.manifest.mod_info.id))?;
     let artifact = if let Some(path) = &item.manifest.plugin.artifact {
-        layout.plugin_target.join(profile_directory(profile)).join(path)
+        layout.cargo_target.join(profile_directory(profile)).join(path)
     } else {
         find_dynamic_library_artifact(&output, item.manifest.plugin.package.as_deref())?
     };

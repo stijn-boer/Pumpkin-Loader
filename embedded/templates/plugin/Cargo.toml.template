@@ -1,9 +1,9 @@
 [package]
-name = "pumpkin-plugin-{{MOD_ID}}"
+name = "{{MOD_ID}}"
 version = "0.1.0"
 edition = "2024"
 publish = false
-description = "{{MOD_NAME}} plugin for Pumpkin"
+description = "{{MOD_NAME}} mod for Pumpkin"
 
 [lib]
 crate-type = ["cdylib"]
@@ -11,6 +11,9 @@ crate-type = ["cdylib"]
 [dependencies]
 pumpkin = { path = "{{PUMPKIN_PATH}}", package = "pumpkin" }
 pumpkin-api-macros = { path = "{{PUMPKIN_API_MACROS_PATH}}", package = "pumpkin-api-macros" }
+pumpkin-data = { path = "{{PUMPKIN_DATA_PATH}}", package = "pumpkin-data" }
+pumpkin-protocol = { path = "{{PUMPKIN_PROTOCOL_PATH}}", package = "pumpkin-protocol" }
+pumpkin-util = { path = "{{PUMPKIN_UTIL_PATH}}", package = "pumpkin-util" }
 
 tokio = "1"
 tracing = "0.1"
